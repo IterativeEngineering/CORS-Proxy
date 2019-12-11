@@ -1,9 +1,17 @@
 FROM node:8
 
-RUN npm install -g corsproxy
+WORKDIR /usr/src/app
 
-EXPOSE 1337
+COPY package*.json ./
 
 ENV CORSPROXY_HOST 0.0.0.0
 
-ENTRYPOINT ["corsproxy"]
+# ENV CORSPROXY_ALLOWED_DOMAIN=...
+
+RUN npm install
+
+COPY . .
+
+EXPOSE 1337
+
+ENTRYPOINT ["bin/corsproxy"]

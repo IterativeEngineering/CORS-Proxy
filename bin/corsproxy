@@ -10,6 +10,7 @@ var port = parseInt(process.env.CORSPROXY_PORT || process.env.PORT || 1337, 10)
 var host = (process.env.CORSPROXY_HOST || 'localhost');
 var maxPayload = parseInt(process.env.CORSPROXY_MAX_PAYLOAD || 1048576, 10)
 var proxy = server.connection({ port: port, labels: ['proxy'], host: host})
+var allowedDomain = process.env.CORSPROXY_ALLOWED_DOMAIN || null
 
 server.register(require('inert'), function () {})
 server.register(require('h2o2'), function () {})
@@ -37,6 +38,10 @@ proxy.route({
     proxy: {
       passThrough: true,
       mapUri: function (request, callback) {
+        if (allowedDomain && request.params.host !== allowedDomain) {
+          console.error(`Request domain ${request.params.host} is not allowed`) ;
+          return;
+        }
         request.host = request.params.host
         request.path = request.path.substr(request.params.host.length + 1)
         request.headers['host'] = request.host
